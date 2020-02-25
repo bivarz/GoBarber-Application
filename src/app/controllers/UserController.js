@@ -1,0 +1,82 @@
+import * as yup from 'yup';
+import User from '../models/User';
+
+class UserController {
+  async store(req, res) {
+    const schema = yup.object().shape({
+      name: yup.string().required(),
+      email: yup
+        .string()
+        .email()
+        .required(),
+      password: yup
+        .string()
+        .required()
+        .min(6),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation fails' });
+    }
+    const userExists = await User.findOne({ where: { email: req.body.email } });
+
+    if (userExists) {
+      return res.status(400).json({
+        Erro: `The Email ${req.body.email} já possui cadastro, tente com outro.`,
+      });
+    }
+    const { id, name, email, provider } = await User.create(req.body);
+    return res.json({
+      id,
+      name,
+      email,
+      provider,
+    });
+  }
+
+  async update(req, res) {
+    const schema = yup.object().shape({
+      name: yup.string(),
+      email: yup.string().email(),
+      oldPassword: yup
+        .string()
+        .min(6)
+        .max(12),
+      password: yup
+        .string()
+        .min(6)
+        .when('oldPassword', (oldPassword, field) =>
+          oldPassword ? field.required() : field
+        ),
+      confirmPass: yup
+        .string()
+        .when('password', (password, field) =>
+          password ? field.required().oneOf([yup.ref('password')]) : field
+        ),
+    });
+
+    if (!(await schema.isValid(req.body))) {
+      return res.status(400).json({ error: 'Validation fails' });
+    }
+    const { email, oldPassword } = req.body;
+
+    const user = await User.findByPk(req.userId);
+
+    if (email && email !== user.email) {
+      const userExists = await User.findOne({ where: { email } });
+
+      if (userExists) {
+        return res.status(400).json({ error: 'User Already exists' });
+      }
+    }
+
+    if (oldPassword && !(await user.checkPassword(oldPassword))) {
+      return res.status(401).json({ erro: 'The password does not match' });
+    }
+
+    const { id, name, provider } = await user.update(req.body);
+
+    return res.json({ id, name, email, provider });
+  }
+}
+export default new UserController();
