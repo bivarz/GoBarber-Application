@@ -5,8 +5,8 @@ import Appointment from '../models/Appointment';
 import File from '../models/Files';
 import User from '../models/User';
 import Notification from '../schemas/notification';
-
-import Mail from '../../lib/Mail';
+import Queue from '../../lib/Queue';
+import Cancellation from '../jobs/cancellationMail';
 
 class AppointmentController {
   async store(req, res) {
@@ -147,17 +147,8 @@ class AppointmentController {
 
     await appointment.save();
 
-    await Mail.sendMail({
-      to: `${appointment.provider.name}<${appointment.provider.email}`,
-      subject: ' Agendamento Cancelado',
-      template: 'cancellation',
-      context: {
-        provider: appointment.provider.name,
-        user: appointment.user.name,
-        date: format(appointment.date, "'dia' dd 'de' MMMM', às' H:mm'h'", {
-          locale: pt,
-        }),
-      },
+    await Queue.add(Cancellation.key, {
+      appointment,
     });
 
     return res.json(appointment);
