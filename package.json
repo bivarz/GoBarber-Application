@@ -1,7 +1,6 @@
 {
   "name": "gostack",
   "dependencies": {
-    "acorn": "^7.1.1",
     "bcryptjs": "^2.4.3",
     "bee-queue": "^1.2.3",
     "date-fns": "^2.0.0-beta.5",
@@ -25,10 +24,11 @@
     "dev:debug": "nodemon --inspect src/server.js"
   },
   "devDependencies": {
-    "eslint": "^7.0.0-alpha.2",
+    "acorn": "^7.1.1",
+    "eslint": "^6.8.0",
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-config-prettier": "^6.10.0",
-    "eslint-plugin-import": "^2.0.0-beta.1",
+    "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-prettier": "^3.1.2",
     "nodemon": "^2.0.2",
     "prettier": "^1.19.1",
