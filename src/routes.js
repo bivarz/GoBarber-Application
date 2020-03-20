@@ -32,6 +32,4 @@ routes.put('/notifications/:id', NotificationController.update);
 
 routes.post('/files', upload.single('file'), FileController.store);
 
-// routes.delete('/users', UserController.delete);
-
 export default routes;
